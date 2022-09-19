@@ -335,7 +335,7 @@ template<typename T> class CLevenshtein : public CEditDistance
         }
 };
 
-template<typename T> class CDamerauLevenshtein : public CEditDistance
+template<typename T> class COSALevenshtein : public CEditDistance
 {
 private:
     T* m_pArray;
@@ -343,7 +343,7 @@ private:
     size_t m_NoRows;
     size_t m_MaxSize;
     size_t m_EditDistance;
-    CDamerauLevenshtein();
+    COSALevenshtein();
 
     void ShowSequence(std::string str1, std::string str2)
     {
@@ -695,7 +695,7 @@ private:
     }
 
 public:
-    CDamerauLevenshtein(size_t columns, size_t rows) : CEditDistance(), m_pArray(nullptr), m_NoColumns(columns), m_NoRows(rows), m_MaxSize(m_NoColumns* m_NoRows), m_EditDistance(0u)
+    COSALevenshtein(size_t columns, size_t rows) : CEditDistance(), m_pArray(nullptr), m_NoColumns(columns), m_NoRows(rows), m_MaxSize(m_NoColumns* m_NoRows), m_EditDistance(0u)
     {
         const size_t size = m_MaxSize;
         m_pArray = new T[size];
@@ -705,7 +705,7 @@ public:
         }
     }
 
-    CDamerauLevenshtein(std::string str1, std::string str2) : CEditDistance(), m_pArray(nullptr), m_NoColumns(str1.length()), m_NoRows(str2.length()), m_EditDistance(0u)
+    COSALevenshtein(std::string str1, std::string str2) : CEditDistance(), m_pArray(nullptr), m_NoColumns(str1.length()), m_NoRows(str2.length()), m_EditDistance(0u)
     {
         const size_t size = m_NoColumns * m_NoRows;
         m_MaxSize = size;
@@ -720,7 +720,7 @@ public:
         }
     }
 
-    virtual ~CDamerauLevenshtein()
+    virtual ~COSALevenshtein()
     {
         if (m_pArray != nullptr)
             delete[]m_pArray;
@@ -752,9 +752,9 @@ public:
 
 int main()
 {
-    std::string str1 = "Hillary";
-    std::string str2 = "Hlilair";
-    CLevenshtein<uint8_t> a(str1, str2);
+    std::string str1 = "ca";
+    std::string str2 = "abc";
+    COSALevenshtein<uint8_t> a(str1, str2);
     a.PrintEditDistanceSequenze(str1, str2);
 }
 
