@@ -1095,8 +1095,8 @@ private:
                             {
                                 const T letter_a_of_b = init_letters_of_a[letter_b];
                                 const T letter_b_of_a = letters_of_b[a[j]];
-                                const T basecost = (letter_a_of_b == 0) ? (letter_b_of_a == 0)? 0 : letter_b_of_a-1 
-                                    : (letter_b_of_a == 0) ? letter_a_of_b-1:m_pArray[letter_a_of_b - 1 + m_NoColumns * (letter_b_of_a - 1)];
+                                const T basecost = (letter_a_of_b == 0) ? (letter_b_of_a == 0)? 0 : letter_b_of_a 
+                                    : (letter_b_of_a == 0) ? letter_a_of_b:m_pArray[letter_a_of_b - 1 + m_NoColumns * (letter_b_of_a - 1)];
                                 const T deletions = static_cast<T>(j) - init_letters_of_a[letter_b] - 1;
                                 const T insertions = static_cast<T>(i) - letter_b_of_a - 1;
                                 const T rel_twist = 1 + deletions + insertions + basecost;
@@ -1222,8 +1222,8 @@ int main()
 {
     //std::string str1 = "tomcat";
     //std::string str2 = "mttaco";
-    std::string str1 = " CA";
-    std::string str2 = "ABC";
+    std::string str1 = "ka";
+    std::string str2 = "akb";
     CDamerauLevenshtein<uint8_t> a(str1, str2);
     a.PrintEditDistanceSequenze(str1, str2);
 }
