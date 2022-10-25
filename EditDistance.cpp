@@ -991,21 +991,40 @@ private:
                     {
                         const size_t prevrow = baserow;
                         baserow += m_NoColumns;
-                        const auto letter_b = b[1];
+                        const auto letter_b0 = b[0];
+                        const auto letter_b1 = b[1];
+                        
+                        std::unordered_map<std::string::value_type, T> letters_of_a;
+                        letters_of_a[a[0]] = 0;
+
                         for (size_t j = 1u; j < m_NoColumns; ++j)
                         {
-                            const T cost = (a[j] == letter_b) ? 0u : 1u;
+                            const T cost = (a[j] == letter_b1) ? 0u : 1u;
                             const T rel_tail = m_pArray[prevrow + (j - 1)] + cost;
                             const T rel_indel = std::min(m_pArray[prevrow + j], m_pArray[baserow + (j - 1)]) + 1u;
                             const T overallmin = std::min(rel_tail, rel_indel);
-                            m_pArray[baserow + j] = overallmin;
+                            if ((a[j] == letter_b0) && letters_of_a.count(letter_b1))
+                            {
+                                const T columnnumber = letters_of_a[letter_b1];
+                                const T basecost = (columnnumber > 0) ? m_pArray[columnnumber - 1]:0;
+                                const T deletions = static_cast<T>(j) - letters_of_a[letter_b1] - 1;
+                                const T rel_twist = 1 + deletions + basecost;
+                                m_pArray[baserow + j] = std::min(overallmin, rel_twist);
+                            }
+                            else
+                            {
+                                m_pArray[baserow + j] = overallmin;
+                            }
+                            letters_of_a[a[j]] = static_cast<T>(j);
                         }
                     }
-
 
                     if (1u < m_NoColumns)
                     {
                         baserow = 0;
+                        std::unordered_map<std::string::value_type, T> letters_of_b;
+                        letters_of_b[b[0]] = 0;
+
                         for (size_t i = 1u; i < m_NoRows; ++i)
                         {
                             const size_t prevrow = baserow;
@@ -1016,7 +1035,19 @@ private:
                             const T rel_tail = m_pArray[prevrow] + cost;
                             const T rel_indel = std::min(m_pArray[prevrow + 1], m_pArray[baserow]) + 1u;
                             const T overallmin = std::min(rel_tail, rel_indel);
-                            m_pArray[baserow + 1] = overallmin;
+                            if (letter_b == a[0] && letters_of_b.count(a[1]))
+                            {
+                                const T rowno = letters_of_b[a[1]];
+                                const T basecost = (rowno < m_NoColumns)? 0: m_pArray[m_NoColumns * (rowno - 1)];
+                                const T insertions = static_cast<T>(i) - letters_of_b[a[1]] - 1;
+                                const T rel_twist = 1 + insertions + basecost;
+                                m_pArray[baserow + 1] = std::min(overallmin, rel_twist);
+                            }
+                            else
+                            {
+                                m_pArray[baserow + 1] = overallmin;
+                            }
+                            letters_of_b[b[i]] = static_cast<T>(i);
                         }
                     }
 
@@ -1024,6 +1055,7 @@ private:
                     std::unordered_map<std::string::value_type, T> letters_of_a;
                     if (1u < m_NoRows && 1u < m_NoColumns)
                     {
+#if 0
                         const T edit_cost = m_pArray[baserow + 1u];
                         const auto letter_b_prev = b[0];
                         const auto letter_a_prev = a[0];
@@ -1040,6 +1072,11 @@ private:
                             letters_of_a[a[0]] = 0;
                             letters_of_a[a[1]] = 1;
                         }
+#endif
+                        letters_of_b[b[0]] = 0;
+                        letters_of_b[b[1]] = 1;
+                        letters_of_a[a[0]] = 0;
+                        letters_of_a[a[1]] = 1;
                     }
 
                     for (size_t i = 2u; i < m_NoRows; ++i)
@@ -1056,9 +1093,12 @@ private:
                             const T overallmin = std::min(rel_tail, rel_indel);
                             if (letters_of_b.count(a[j]) && init_letters_of_a.count(letter_b))
                             {
-                                const T basecost = m_pArray[init_letters_of_a[letter_b] - 1 + m_NoColumns * (letters_of_b[a[j]] - 1)];
-                                const T deletions = static_cast<T>(j) - letters_of_b[a[j]] - 1;
-                                const T insertions = static_cast<T>(i) - init_letters_of_a[letter_b] - 1;
+                                const T letter_a_of_b = init_letters_of_a[letter_b];
+                                const T letter_b_of_a = letters_of_b[a[j]];
+                                const T basecost = (letter_a_of_b == 0) ? (letter_b_of_a == 0)? 0 : letter_b_of_a-1 
+                                    : (letter_b_of_a == 0) ? letter_a_of_b-1:m_pArray[letter_a_of_b - 1 + m_NoColumns * (letter_b_of_a - 1)];
+                                const T deletions = static_cast<T>(j) - init_letters_of_a[letter_b] - 1;
+                                const T insertions = static_cast<T>(i) - letter_b_of_a - 1;
                                 const T rel_twist = 1 + deletions + insertions + basecost;
                                 m_pArray[baserow + j] = std::min(overallmin, rel_twist);
                             }
@@ -1180,8 +1220,10 @@ public:
 
 int main()
 {
-    std::string str1 = "hello dw";
-    std::string str2 = "hello world";
+    //std::string str1 = "tomcat";
+    //std::string str2 = "mttaco";
+    std::string str1 = " CA";
+    std::string str2 = "ABC";
     CDamerauLevenshtein<uint8_t> a(str1, str2);
     a.PrintEditDistanceSequenze(str1, str2);
 }
